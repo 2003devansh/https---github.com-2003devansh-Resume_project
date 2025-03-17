@@ -9,17 +9,35 @@ const getPosts = async (req, res) => {
     }
 };
 
-const createPost = async (req, res) => { // Added missing async keyword
+const createPost = async (req, res) => {
     try {
         const post = req.body;
         const newPost = new PostMessage(post);
-        await newPost.save(); // Await the save to ensure it's completed before responding
+        await newPost.save();
         res.status(201).json(newPost);
-        
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-}
+};
 
-// Export both functions together as an object
-module.exports = { getPosts, createPost };
+const deletePost = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await PostMessage.findByIdAndDelete(id);
+        res.json({ message: "Post deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const updatePost = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedPost = await PostMessage.findByIdAndUpdate(id, req.body, { new: true });
+        res.json(updatedPost);
+    } catch (error) {
+        res.status(500).json({ message: error.message }); 
+    }
+};
+
+module.exports = { getPosts, createPost, updatePost, deletePost };
