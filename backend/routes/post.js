@@ -3,6 +3,9 @@ const router = express.Router();
 
 const  {getPosts , createPost , updatePost ,deletePost }  = require('../controllers/posts.js');
 
+
+
+
 // to get all the posts
 router.get('/',getPosts);
 
@@ -14,6 +17,8 @@ router.put('/:id',updatePost);
 
 // to delete a post
 router.delete('/:id',deletePost) ;
+
+
 
 
 
