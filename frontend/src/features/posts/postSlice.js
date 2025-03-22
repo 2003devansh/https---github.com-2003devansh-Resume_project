@@ -5,7 +5,7 @@ import * as postAPI from '../../api/post';
 const getPosts = createAsyncThunk('posts/getPosts', async (_, thunkAPI) => {
     try {
         const { data } = await postAPI.fetchPosts();
-        return data;
+        return data; // this is payload
     } catch (error) {
         return thunkAPI.rejectWithValue({ error: error.message });
     }
@@ -15,7 +15,7 @@ const getPosts = createAsyncThunk('posts/getPosts', async (_, thunkAPI) => {
 const createPost = createAsyncThunk('posts/createPost', async (newPost, thunkAPI) => {
     try {
         const { data } = await postAPI.createPost(newPost);
-        return data;
+        return data; 
     } catch (error) {
         return thunkAPI.rejectWithValue({ error: error.message });
     }
@@ -41,45 +41,77 @@ const deletePost = createAsyncThunk('posts/deletePost', async (id, thunkAPI) => 
     }
 });
 
-
-const PostSlice  = createSlice({
-    name:"posts",
-    intialState:{
-        posts:[] ,
-        isLoading: false , 
-        error: null , 
+// The Slice
+const postSlice = createSlice({
+    name: "posts",
+    initialState: {
+        posts: [],
+        isLoading: false,
+        error: null,
     },
-
-    reducers: {} ,
-    extraReducers: (builder) =>{
-        builder. // getPosts
-        addCase(getPosts.pending,(state)=>{
-            state.isLoading = true ;
-            state.error = null ;
-        })
-        .addCase(getPosts.fullfilled , (state)=>{
-            state.isLoading = false ; 
-            state.posts = action.payload ;
-        })
-        .addCase(getPosts.rejected,(state)=>{
-            state.isLoading = true  ; 
-            state.error =  action.payload.error ; 
-        })
-
-        // updatePost 
-        .addCase(updatePost.pending, (state)=>{
-            state.isLoading = true ; 
-            state.error = null ; 
-        })
-        .addCase(updatePost.fullfilled,(state)=>{
-            state.isLoading = false ; 
-            state.posts = state.posts.map((posts)=>{
-                postAPI.id === action.payload._id ? action.payload : posts
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            // getPosts
+            .addCase(getPosts.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
             })
-        })
-        .addCase(updatePost.rejected,(state)=>{
-            state.isLoading =  false ;
-            state.
-        })
-    }
-})
+            .addCase(getPosts.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.posts = action.payload;
+            })
+            .addCase(getPosts.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload.error;
+            })
+
+            // createPost
+            .addCase(createPost.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(createPost.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.posts.push(action.payload);
+            })
+            .addCase(createPost.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload.error;
+            })
+
+            // updatePost
+            .addCase(updatePost.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(updatePost.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.posts = state.posts.map((post) =>
+                    post._id === action.payload._id ? action.payload : post
+                );
+            })
+            .addCase(updatePost.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload.error;
+            })
+
+            // deletePost
+            .addCase(deletePost.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(deletePost.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.posts = state.posts.filter((post) => post._id !== action.payload);
+            })
+            .addCase(deletePost.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload.error;
+            });
+    },
+});
+
+// Export everything here 👇
+export default postSlice.reducer;
+export { getPosts, createPost, updatePost, deletePost };
