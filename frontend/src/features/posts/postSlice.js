@@ -61,7 +61,7 @@ const PostSlice  = createSlice({
             state.isLoading = false ; 
             state.posts = action.payload ;
         })
-        .addCase(getPosts.reject,(state)=>{
+        .addCase(getPosts.rejected,(state)=>{
             state.isLoading = true  ; 
             state.error =  action.payload.error ; 
         })
@@ -70,6 +70,16 @@ const PostSlice  = createSlice({
         .addCase(updatePost.pending, (state)=>{
             state.isLoading = true ; 
             state.error = null ; 
+        })
+        .addCase(updatePost.fullfilled,(state)=>{
+            state.isLoading = false ; 
+            state.posts = state.posts.map((posts)=>{
+                postAPI.id === action.payload._id ? action.payload : posts
+            })
+        })
+        .addCase(updatePost.rejected,(state)=>{
+            state.isLoading =  false ;
+            state.
         })
     }
 })
