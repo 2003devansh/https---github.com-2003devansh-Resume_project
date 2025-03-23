@@ -1,6 +1,6 @@
 import {configureStore} from '@reduxjs/toolkit';
-import authReducer  from './feature/authslice';
-import postReducer from './feature/postSlice';
+import postReducer from './features/postSlice';
+import authReducer from './features/authSlice';
 
 
 

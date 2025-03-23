@@ -1,26 +1,26 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as authAPI from '../../api/auth';
 
-// login thunk
-const login = createAsyncThunk('auth/login', async (formData, thunkAPI) => {
+// Async thunks
+export const login = createAsyncThunk('auth/login', async (formData, thunkAPI) => {
     try {
         const { data } = await authAPI.signIn(formData);
         return data;
     } catch (error) {
-        return thunkAPI.rejectWithValue({ error: error.message });
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
     }
 });
 
-// signUp thunk
-const signUp = createAsyncThunk('auth/signup', async (formData, thunkAPI) => {
+export const signUp = createAsyncThunk('auth/signup', async (formData, thunkAPI) => {
     try {
         const { data } = await authAPI.signUp(formData);
         return data;
     } catch (error) {
-        return thunkAPI.rejectWithValue({ error: error.message });
+        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
     }
 });
 
+// Slice
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
@@ -38,40 +38,37 @@ const authSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // login
             .addCase(login.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
             })
             .addCase(login.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.user = action.payload.result;
+                state.user = action.payload.user;
                 state.token = action.payload.token;
-                localStorage.setItem('profile', JSON.stringify({ user: action.payload.result, token: action.payload.token }));
+                localStorage.setItem('profile', JSON.stringify({ user: action.payload.user, token: action.payload.token }));
             })
             .addCase(login.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.payload.error;
+                state.error = action.payload;
             })
-
-            // signUp
             .addCase(signUp.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
             })
             .addCase(signUp.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.user = action.payload.result;
+                state.user = action.payload.user;
                 state.token = action.payload.token;
-                localStorage.setItem('profile', JSON.stringify({ user: action.payload.result, token: action.payload.token }));
+                localStorage.setItem('profile', JSON.stringify({ user: action.payload.user, token: action.payload.token }));
             })
             .addCase(signUp.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.payload.error;
+                state.error = action.payload;
             });
     },
 });
 
-export { login, signUp };
 export const { logout } = authSlice.actions;
+
 export default authSlice.reducer;
