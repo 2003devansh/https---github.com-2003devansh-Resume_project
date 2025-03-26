@@ -43,4 +43,26 @@ export default function PostForm(){
         })
     }
 
+    return (
+        <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-bold mb-4">
+              Create a Post
+            </h2>
+            <input 
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            className="w-full p-2 mb-3 border rounded"
+            required
+             />
+             <textarea
+             name="description"
+             placeholder="Description"
+             value={formData.description}
+             
+             ></textarea>
+        </div>
+    )
+
 }
