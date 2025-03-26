@@ -1,20 +1,23 @@
 import API from "./index";
 
-const fetchPosts = ()=>{
-    API.get('/posts')
-}
+const getPosts = async () => {
+    const response = await API.get('/posts');
+    return response.data; // ✅ Ensure data is returned
+};
 
-const createPost = (newPost)=>{
-    API.post('/posts',newPost)
-}
+const createPost = async (newPost) => {
+    const response = await API.post('/posts', newPost);
+    return response.data;
+};
 
-const updatePost = (id,updatedPost)=>{
-    API.put(`/posts/${id}`,updatedPost)
-}
+const updatePost = async (id, updatedPost) => {
+    const response = await API.put(`/posts/${id}`, updatedPost);
+    return response.data;
+};
 
-const deletePost = (id)=>{
-    API.delete(`/posts/${id}`)
-}
+const deletePost = async (id) => {
+    const response = await API.delete(`/posts/${id}`);
+    return response.data;
+};
 
-
-export {fetchPosts,createPost,updatePost,deletePost} ;
+export { getPosts, createPost, updatePost, deletePost }; 
