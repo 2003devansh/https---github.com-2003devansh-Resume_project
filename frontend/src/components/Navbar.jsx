@@ -9,8 +9,8 @@ export default function Navbar() {
     const navItems = [
         { name: "Home", path: "/" },
         { name: "Posts", path: "/posts" },
-        { name: "Login", path: "/login" },
-        { name: "Signup", path: "/signup" },
+        { name: "Login", path: "/auth/login" }, // Ensure this matches your route
+        { name: "Signup", path: "/auth/signup" }, // Signup can be part of AuthPage
     ];
 
     return (
@@ -23,7 +23,7 @@ export default function Navbar() {
                     </Link>
                 </motion.div>
 
-                {/* Desktop Nav */}
+                {/* Desktop Navigation */}
                 <div className='hidden md:flex space-x-8'>
                     {navItems.map((item) => (
                         <NavLink
@@ -31,16 +31,17 @@ export default function Navbar() {
                             to={item.path}
                             className={({ isActive }) =>
                                 `text-lg transition-all duration-300 ${
-                                    isActive ? "text-teal-400" : "hover:text-teal-300"
+                                    isActive ? "text-teal-400 font-semibold" : "hover:text-teal-300"
                                 }`
                             }
+                            end
                         >
                             {item.name}
                         </NavLink>
                     ))}
                 </div>
 
-                {/* Mobile Toggle */}
+                {/* Mobile Menu Toggle */}
                 <div className='md:hidden'>
                     <button onClick={() => setIsOpen(!isOpen)}>
                         {isOpen ? <X size={28} /> : <Menu size={28} />}
@@ -48,7 +49,7 @@ export default function Navbar() {
                 </div>
             </div>
 
-            {/* Mobile Nav */}
+            {/* Mobile Navigation */}
             {isOpen && (
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -63,9 +64,10 @@ export default function Navbar() {
                             onClick={() => setIsOpen(false)}
                             className={({ isActive }) =>
                                 `block text-lg ${
-                                    isActive ? "text-teal-400" : "hover:text-teal-300"
+                                    isActive ? "text-teal-400 font-semibold" : "hover:text-teal-300"
                                 }`
                             }
+                            end
                         >
                             {item.name}
                         </NavLink>

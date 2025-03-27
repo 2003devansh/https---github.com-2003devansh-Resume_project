@@ -1,11 +1,11 @@
 import API from './index.js';
 
 // Sign In API call
-export const signIn = (formData) => {
-    return API.post('/user/signin', formData);
+export const login = (formData) => {
+    return API.post('/user/login', formData);
 };
 
 // Sign Up API call
-export const signUp = (formData) => {
+export const signup = (formData) => {
     return API.post('/user/signup', formData);
 };
