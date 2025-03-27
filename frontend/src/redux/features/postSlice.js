@@ -1,40 +1,29 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import * as postAPI from '../../api/post';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
-// Async thunk
-export const fetchPosts = createAsyncThunk('posts/fetchPosts', async (_, thunkAPI) => {
-    try {
-        const { data } = await postAPI.getPosts();
-        return data;
-    } catch (error) {
-        return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
-    }
+export const fetchPosts = createAsyncThunk("posts/fetchPosts", async () => {
+  const { data } = await axios.get("http://localhost:5000/posts");
+  return data;
 });
 
-// Slice
+export const createPost = createAsyncThunk("posts/createPost", async (post) => {
+  const { data } = await axios.post("http://localhost:5000/posts", post);
+  return data;
+});
+
 const postSlice = createSlice({
-    name: 'posts',
-    initialState: {
-        posts: [],
-        isLoading: false,
-        error: null,
-    },
-    reducers: {},
-    extraReducers: (builder) => {
-        builder
-            .addCase(fetchPosts.pending, (state) => {
-                state.isLoading = true;
-                state.error = null;
-            })
-            .addCase(fetchPosts.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.posts = action.payload;
-            })
-            .addCase(fetchPosts.rejected, (state, action) => {
-                state.isLoading = false;
-                state.error = action.payload;
-            });
-    },
+  name: "posts",
+  initialState: { posts: [], status: "idle" },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchPosts.fulfilled, (state, action) => {
+        state.posts = action.payload;
+      })
+      .addCase(createPost.fulfilled, (state, action) => {
+        state.posts.push(action.payload);
+      });
+  },
 });
 
 export default postSlice.reducer;

@@ -1,78 +1,36 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { createPost } from "../redux/features/postSlice";
-import AuthPrompt from "../hooks/useAuthPrompt";
 
 export default function PostForm() {
+  const [post, setPost] = useState({ title: "", content: "" });
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth); // Fixed useSelector return
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    image: null,
-  });
-
-  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-
-  const handleChange = (event) => {
-    setFormData({ ...formData, [event.target.name]: event.target.value });
-  };
-
-  const handleImageChange = (event) => {
-    setFormData({ ...formData, image: event.target.files[0] });
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (!user) {
-      setShowAuthPrompt(true);
-      return;
-    }
-
-    const postData = new FormData();
-    postData.append("title", formData.title);
-    postData.append("description", formData.description);
-    if (formData.image) {
-      postData.append("image", formData.image);
-    }
-
-    dispatch(createPost(postData));
-    setFormData({ title: "", description: "", image: null });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(createPost(post));
+    setPost({ title: "", content: "" });
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-bold mb-4">Create a Post</h2>
+    <div className="post-form">
+      <h2>Create a Post</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          name="title"
           placeholder="Title"
-          value={formData.title}
-          onChange={handleChange}
-          className="w-full p-2 mb-3 border rounded"
+          value={post.title}
+          onChange={(e) => setPost({ ...post, title: e.target.value })}
           required
         />
         <textarea
-          name="description"
-          placeholder="Description"
-          value={formData.description}
-          onChange={handleChange}
-          className="w-full p-2 mb-3 border rounded"
+          placeholder="Write your post..."
+          value={post.content}
+          onChange={(e) => setPost({ ...post, content: e.target.value })}
           required
-        ></textarea>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="w-full p-2 mb-3 border rounded"
         />
-        <button type="submit" className="w-full bg-teal-500 text-white py-2 rounded">
-          Post
-        </button>
+        <button type="submit">Post</button>
       </form>
-      {showAuthPrompt && <AuthPrompt onClose={() => setShowAuthPrompt(false)} />}
     </div>
   );
 }
