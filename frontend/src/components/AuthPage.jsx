@@ -7,17 +7,41 @@ import { motion } from "framer-motion";
 export default function AuthPage() {
   const [isSignup, setIsSignup] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSignup) {
-      dispatch(signUp(formData));
-    } else {
-      dispatch(login(formData));
+    setError(""); // Clear previous errors
+    setLoading(true);
+
+    try {
+      const url = isSignup
+        ? "http://localhost:5000/auth/signup"
+        : "http://localhost:5000/auth/login";
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Authentication failed");
+      }
+
+      dispatch(isSignup ? signUp(data) : login(data));
+      navigate("/");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    navigate("/");
   };
 
   return (
@@ -31,6 +55,8 @@ export default function AuthPage() {
         <h2 className="text-2xl font-semibold text-center mb-6">
           {isSignup ? "Create an Account" : "Welcome Back"}
         </h2>
+
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -53,9 +79,10 @@ export default function AuthPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type="submit"
+            disabled={loading}
             className="w-full bg-teal-500 text-white py-3 rounded-lg font-semibold hover:bg-teal-600 transition"
           >
-            {isSignup ? "Sign Up" : "Login"}
+            {loading ? "Processing..." : isSignup ? "Sign Up" : "Login"}
           </motion.button>
         </form>
 
