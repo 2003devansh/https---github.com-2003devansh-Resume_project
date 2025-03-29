@@ -1,17 +1,14 @@
-const express = require("express");
-const cors = require("cors");
-const cookieParser = require("cookie-parser"); // Import cookie-parser
-const postRoutes = require("./routes/post");
-const authRoutes = require("./routes/auth");
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv')
+const mongoose = require('mongoose') ;
 
-const app = express();
+const app = express() ;
+dotenv.config() ;
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true })); // Allow credentials
-app.use(express.json({ limit: "30mb" }));
-app.use(express.urlencoded({ limit: "30mb", extended: true }));
-app.use(cookieParser()); // Use cookie-parser middleware
 
-app.use("/posts", postRoutes);
-app.use("/auth", authRoutes);
+app.use("/",(req,res)=>{
+    res.send("server is started") ;
+})
 
-module.exports = app;
+module.exports  = app ; 
