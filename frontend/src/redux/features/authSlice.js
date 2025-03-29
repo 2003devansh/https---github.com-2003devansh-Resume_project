@@ -6,7 +6,8 @@ export const login = createAsyncThunk(
   "auth/login",
   async (credentials, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post("http://localhost:5000/auth/login", credentials);
+      const { data } = await axios.post("http://localhost:5000/auth/login", credentials, { withCredentials: true });
+      localStorage.setItem("profile", JSON.stringify(data)); // Save user info
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Login failed");
@@ -19,7 +20,8 @@ export const signUp = createAsyncThunk(
   "auth/signup",
   async (credentials, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post("http://localhost:5000/auth/signup", credentials);
+      const { data } = await axios.post("http://localhost:5000/auth/signup", credentials, { withCredentials: true });
+      localStorage.setItem("profile", JSON.stringify(data)); // Save user info
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Signup failed");
@@ -29,21 +31,32 @@ export const signUp = createAsyncThunk(
 
 // Logout Action
 export const logout = createAsyncThunk("auth/logout", async (_, { dispatch }) => {
-  dispatch(clearUser());
+  try {
+    await axios.get("http://localhost:5000/auth/logout", { withCredentials: true });
+    localStorage.removeItem("profile");
+    dispatch(clearUser()); // Clear Redux state
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
 });
+
+const initialState = {
+  user: JSON.parse(localStorage.getItem("profile")) || null,
+  status: "idle", // idle | loading | succeeded | failed
+  error: null,
+};
 
 const authSlice = createSlice({
   name: "auth",
-  initialState: {
-    user: null,
-    status: "idle", // idle | loading | succeeded | failed
-    error: null,
-  },
+  initialState,
   reducers: {
     clearUser: (state) => {
       state.user = null;
       state.status = "idle";
       state.error = null;
+    },
+    setUser: (state, action) => {
+      state.user = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -84,5 +97,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearUser } = authSlice.actions;
+export const { clearUser, setUser } = authSlice.actions;
 export default authSlice.reducer;

@@ -1,21 +1,34 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../redux/features/authSlice";
+import { logout, setUser } from "../redux/features/authSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function UserProfile() {
   const dispatch = useDispatch();
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-  const { user } = useSelector((state) => state.auth) || storedUser;
+  const navigate = useNavigate();
+  const storedUser = JSON.parse(localStorage.getItem("profile")); // Get profile from storage
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (!user && storedUser) {
-      dispatch({ type: "auth/login/fulfilled", payload: storedUser }); // Restore user if needed
+      dispatch(setUser(storedUser)); // Restore user from storage
     }
   }, [user, storedUser, dispatch]);
 
   if (!user) {
-    return <h2 className="text-center mt-10 text-lg font-bold text-white">Please login to view profile</h2>;
+    return (
+      <h2 className="text-center mt-10 text-lg font-bold text-white">
+        Please login to view profile
+      </h2>
+    );
   }
+
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem("profile");
+    localStorage.removeItem("token");
+    navigate("/auth"); // Redirect to login
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#121212] text-white">
@@ -26,10 +39,7 @@ export default function UserProfile() {
         <h2 className="text-2xl font-bold mb-2">{user.name || "N/A"}</h2>
         <p className="text-gray-400">{user.email}</p>
         <button
-          onClick={() => {
-            dispatch(logout());
-            localStorage.removeItem("user"); // Clear user on logout
-          }}
+          onClick={handleLogout}
           className="w-full mt-4 bg-red-500 text-white py-2 rounded hover:bg-red-600"
         >
           Logout

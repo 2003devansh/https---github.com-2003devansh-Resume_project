@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 export default function PostForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
   const { status, error } = useSelector((state) => state.posts);
 
   const [postData, setPostData] = useState({
@@ -16,63 +15,66 @@ export default function PostForm() {
     selectedFile: "",
   });
 
-  if (!user) {
-    return <p className="text-center text-lg text-gray-500">You need to log in to create a post.</p>;
-  }
-
   const handleChange = (e) => {
     setPostData({ ...postData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newPost = { ...postData, tags: postData.tags.split(","), creator: user.name };
-    dispatch(createPost(newPost));
-    navigate("/");
+    dispatch(createPost({ ...postData, tags: postData.tags.split(",") })).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        navigate("/"); // Redirect to homepage after successful post creation
+      }
+    });
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-[#1e1e1e] p-6 rounded-lg shadow-md text-white">
-      <h2 className="text-2xl font-semibold mb-4">Create a Post</h2>
-      {status === "failed" && <p className="text-red-500">{error}</p>}
-      <form onSubmit={handleSubmit}>
+    <div className="max-w-3xl mx-auto p-6 bg-[#1e1e1e] text-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold mb-4">Create a New Post</h2>
+      {error && <p className="text-red-500">{error}</p>}
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="text"
           name="title"
           placeholder="Title"
-          className="w-full p-2 mb-3 bg-gray-800 rounded"
           value={postData.title}
           onChange={handleChange}
           required
+          className="p-2 bg-gray-800 border border-gray-600 rounded"
         />
+
         <textarea
           name="message"
           placeholder="Message"
-          className="w-full p-2 mb-3 bg-gray-800 rounded"
           value={postData.message}
           onChange={handleChange}
           required
+          className="p-2 bg-gray-800 border border-gray-600 rounded"
         />
+
         <input
           type="text"
           name="tags"
-          placeholder="Tags (comma separated)"
-          className="w-full p-2 mb-3 bg-gray-800 rounded"
+          placeholder="Tags (comma-separated)"
           value={postData.tags}
           onChange={handleChange}
+          className="p-2 bg-gray-800 border border-gray-600 rounded"
         />
+
         <input
           type="text"
           name="selectedFile"
           placeholder="Image URL"
-          className="w-full p-2 mb-3 bg-gray-800 rounded"
           value={postData.selectedFile}
           onChange={handleChange}
+          className="p-2 bg-gray-800 border border-gray-600 rounded"
         />
+
         <button
           type="submit"
-          className="w-full bg-teal-500 text-white p-2 rounded hover:bg-teal-600"
           disabled={status === "loading"}
+          className="bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 rounded"
         >
           {status === "loading" ? "Posting..." : "Create Post"}
         </button>
