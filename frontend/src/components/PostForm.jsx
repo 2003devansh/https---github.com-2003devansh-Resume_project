@@ -1,54 +1,82 @@
-import { useDispatch } from "react-redux";
 import { useState } from "react";
-import axios from "axios";
-import { fetchPosts } from "../redux/features/postSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { createPost } from "../redux/features/postSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function PostForm() {
   const dispatch = useDispatch();
-  const [formData, setFormData] = useState({ title: "", content: "" });
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+  const { status, error } = useSelector((state) => state.posts);
 
-  const handleSubmit = async (e) => {
+  const [postData, setPostData] = useState({
+    title: "",
+    message: "",
+    tags: "",
+    selectedFile: "",
+  });
+
+  if (!user) {
+    return <p className="text-center text-lg text-gray-500">You need to log in to create a post.</p>;
+  }
+
+  const handleChange = (e) => {
+    setPostData({ ...postData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      await axios.post("http://localhost:5000/posts", formData);
-      dispatch(fetchPosts());
-      setFormData({ title: "", content: "" });
-    } catch (error) {
-      console.error("Post creation failed", error);
-    }
+    const newPost = { ...postData, tags: postData.tags.split(","), creator: user.name };
+    dispatch(createPost(newPost));
+    navigate("/");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#121212]">
-      <div className="max-w-lg w-full bg-[#1f1f1f] p-6 rounded-lg shadow-lg text-white">
-        <h2 className="text-2xl font-bold mb-4 text-center">Create a Post</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title Input */}
-          <input
-            type="text"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full p-3 border border-gray-600 rounded bg-[#2a2a2a] text-white focus:outline-none focus:ring-2 focus:ring-teal-500"
-            placeholder="Enter post title..."
-            required
-          />
-          {/* Post Content */}
-          <textarea
-            value={formData.content}
-            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-            className="w-full p-3 border border-gray-600 rounded bg-[#2a2a2a] text-white h-40 resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"
-            placeholder="Write your post..."
-            required
-          />
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-teal-500 text-white py-2 rounded-lg font-semibold hover:bg-teal-600 transition-all"
-          >
-            Publish Post
-          </button>
-        </form>
-      </div>
+    <div className="max-w-lg mx-auto bg-[#1e1e1e] p-6 rounded-lg shadow-md text-white">
+      <h2 className="text-2xl font-semibold mb-4">Create a Post</h2>
+      {status === "failed" && <p className="text-red-500">{error}</p>}
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          name="title"
+          placeholder="Title"
+          className="w-full p-2 mb-3 bg-gray-800 rounded"
+          value={postData.title}
+          onChange={handleChange}
+          required
+        />
+        <textarea
+          name="message"
+          placeholder="Message"
+          className="w-full p-2 mb-3 bg-gray-800 rounded"
+          value={postData.message}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="tags"
+          placeholder="Tags (comma separated)"
+          className="w-full p-2 mb-3 bg-gray-800 rounded"
+          value={postData.tags}
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          name="selectedFile"
+          placeholder="Image URL"
+          className="w-full p-2 mb-3 bg-gray-800 rounded"
+          value={postData.selectedFile}
+          onChange={handleChange}
+        />
+        <button
+          type="submit"
+          className="w-full bg-teal-500 text-white p-2 rounded hover:bg-teal-600"
+          disabled={status === "loading"}
+        >
+          {status === "loading" ? "Posting..." : "Create Post"}
+        </button>
+      </form>
     </div>
   );
 }
