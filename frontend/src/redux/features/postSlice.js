@@ -3,104 +3,107 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000/posts";
 
-// Fetch all posts
+// Async Thunks
 export const fetchPosts = createAsyncThunk("posts/fetchPosts", async (_, { rejectWithValue }) => {
   try {
-    const { data } = await axios.get(API_URL);
-    return data;
+    const response = await axios.get(API_URL);
+    return response.data;
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || "Failed to fetch posts");
   }
 });
 
-// Create a new post
 export const createPost = createAsyncThunk("posts/createPost", async (postData, { rejectWithValue }) => {
   try {
-    const { data } = await axios.post(API_URL, postData, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, // Send JWT token if needed
-    });
-    return data;
+    const token = localStorage.getItem("token");
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    const response = await axios.post(API_URL, postData, config);
+    return response.data;
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || "Failed to create post");
   }
 });
 
-// Update a post
-export const updatePost = createAsyncThunk("posts/updatePost", async ({ id, updatedPost }, { rejectWithValue }) => {
+export const updatePost = createAsyncThunk("posts/updatePost", async ({ id, postData }, { rejectWithValue }) => {
   try {
-    const { data } = await axios.put(`${API_URL}/${id}`, updatedPost, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
-    return data;
+    const token = localStorage.getItem("token");
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    const response = await axios.put(`${API_URL}/${id}`, postData, config);
+    return response.data;
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || "Failed to update post");
   }
 });
 
-// Delete a post
 export const deletePost = createAsyncThunk("posts/deletePost", async (id, { rejectWithValue }) => {
   try {
-    await axios.delete(`${API_URL}/${id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
-    return id; // Return the deleted post ID
+    const token = localStorage.getItem("token");
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    await axios.delete(`${API_URL}/${id}`, config);
+    return id;
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || "Failed to delete post");
   }
 });
 
-// Like a post
-export const likePost = createAsyncThunk("posts/likePost", async (id, { rejectWithValue }) => {
-  try {
-    const { data } = await axios.put(`${API_URL}/${id}/like`, null, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
-    return data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message || "Failed to like post");
-  }
-});
-
+// Slice
 const postSlice = createSlice({
   name: "posts",
   initialState: {
     posts: [],
-    status: "idle", // idle | loading | succeeded | failed
+    loading: false,
     error: null,
   },
-  reducers: {}, // No reducers since all operations use asyncThunk
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchPosts.pending, (state) => {
-        state.status = "loading";
+        state.loading = true;
+        state.error = null;
       })
       .addCase(fetchPosts.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.loading = false;
         state.posts = action.payload;
       })
       .addCase(fetchPosts.rejected, (state, action) => {
-        state.status = "failed";
+        state.loading = false;
         state.error = action.payload;
       })
-
+      .addCase(createPost.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createPost.fulfilled, (state, action) => {
-        state.posts.unshift(action.payload);
+        state.loading = false;
+        state.posts.push(action.payload);
       })
-
+      .addCase(createPost.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updatePost.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(updatePost.fulfilled, (state, action) => {
-        state.posts = state.posts.map((post) =>
-          post._id === action.payload._id ? action.payload : post
-        );
+        state.loading = false;
+        state.posts = state.posts.map((post) => (post._id === action.payload._id ? action.payload : post));
       })
-
+      .addCase(updatePost.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(deletePost.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(deletePost.fulfilled, (state, action) => {
+        state.loading = false;
         state.posts = state.posts.filter((post) => post._id !== action.payload);
       })
-
-      .addCase(likePost.fulfilled, (state, action) => {
-        state.posts = state.posts.map((post) =>
-          post._id === action.payload._id ? action.payload : post
-        );
+      .addCase(deletePost.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

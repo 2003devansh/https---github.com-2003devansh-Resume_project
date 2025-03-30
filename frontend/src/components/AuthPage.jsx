@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export default function AuthPage() {
   const [isSignup, setIsSignup] = useState(false);
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -15,7 +15,7 @@ export default function AuthPage() {
     if (isSignup) {
       dispatch(signUp(formData));
     } else {
-      dispatch(login(formData));
+      dispatch(login({ email: formData.email, password: formData.password }));
     }
     navigate("/"); // Redirect to home page after login/signup
   };
@@ -33,6 +33,16 @@ export default function AuthPage() {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {isSignup && (
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+              className="w-full p-3 border rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-teal-400"
+            />
+          )}
           <input
             type="email"
             placeholder="Email"

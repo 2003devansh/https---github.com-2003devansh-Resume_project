@@ -7,15 +7,16 @@ import PostList from "./components/PostList";
 import PostForm from "./components/PostForm";
 import UserProfile from "./components/UserProfile";
 import AuthPage from "./components/AuthPage";
+import NotFound from "./components/NotFound"; // New 404 Page
 
 export default function App() {
   return (
     <>
-      {/* Navbar should be present on all pages */}
+      {/* Navbar - Persistent across all pages */}
       <Navbar />
 
-      {/* Main content section */}
-      <div className="min-h-screen bg-[#121212] text-white">
+      {/* Main Content Area */}
+      <main className="min-h-screen bg-[#121212] text-white">
         <Routes>
           <Route
             path="/"
@@ -30,8 +31,9 @@ export default function App() {
           <Route path="/create-post" element={<PostForm />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/profile" element={<UserProfile />} />
+          <Route path="*" element={<NotFound />} /> {/* Catch-all route for 404 */}
         </Routes>
-      </div>
+      </main>
 
       {/* Footer */}
       <Footer />

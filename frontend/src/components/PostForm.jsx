@@ -10,9 +10,8 @@ export default function PostForm() {
 
   const [postData, setPostData] = useState({
     title: "",
-    message: "",
-    tags: "",
-    selectedFile: "",
+    content: "",
+    image: "",
   });
 
   const handleChange = (e) => {
@@ -21,9 +20,9 @@ export default function PostForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(createPost({ ...postData, tags: postData.tags.split(",") })).then((res) => {
+    dispatch(createPost(postData)).then((res) => {
       if (res.meta.requestStatus === "fulfilled") {
-        navigate("/"); // Redirect to homepage after successful post creation
+        navigate("/"); // Redirect after successful post creation
       }
     });
   };
@@ -45,9 +44,9 @@ export default function PostForm() {
         />
 
         <textarea
-          name="message"
-          placeholder="Message"
-          value={postData.message}
+          name="content"
+          placeholder="Content"
+          value={postData.content}
           onChange={handleChange}
           required
           className="p-2 bg-gray-800 border border-gray-600 rounded"
@@ -55,18 +54,9 @@ export default function PostForm() {
 
         <input
           type="text"
-          name="tags"
-          placeholder="Tags (comma-separated)"
-          value={postData.tags}
-          onChange={handleChange}
-          className="p-2 bg-gray-800 border border-gray-600 rounded"
-        />
-
-        <input
-          type="text"
-          name="selectedFile"
+          name="image"
           placeholder="Image URL"
-          value={postData.selectedFile}
+          value={postData.image}
           onChange={handleChange}
           className="p-2 bg-gray-800 border border-gray-600 rounded"
         />
