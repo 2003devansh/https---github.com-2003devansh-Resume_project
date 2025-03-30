@@ -5,8 +5,8 @@ import axios from "axios";
 const API_URL = "http://localhost:5000/auth";
 
 // Async Thunks
-export const signupUser = createAsyncThunk(
-  "auth/signupUser",
+export const signup = createAsyncThunk(
+  "auth/signup",
   async (userData, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${API_URL}/signup`, userData);
@@ -17,8 +17,8 @@ export const signupUser = createAsyncThunk(
   }
 );
 
-export const loginUser = createAsyncThunk(
-  "auth/loginUser",
+export const login = createAsyncThunk(
+  "auth/login",
   async (userData, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${API_URL}/login`, userData);
@@ -30,8 +30,9 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
+export const logout = createAsyncThunk("auth/logout", async () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("profile");
   return null;
 });
 
@@ -39,44 +40,50 @@ export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: null,
+    user: JSON.parse(localStorage.getItem("profile")) || null,
     token: localStorage.getItem("token") || null,
     loading: false,
     error: null,
   },
-  reducers: {},
+  reducers: {
+    setUser: (state, action) => {
+      state.user = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(signupUser.pending, (state) => {
+      .addCase(signup.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(signupUser.fulfilled, (state, action) => {
+      .addCase(signup.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
       })
-      .addCase(signupUser.rejected, (state, action) => {
+      .addCase(signup.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(loginUser.pending, (state) => {
+      .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(loginUser.fulfilled, (state, action) => {
+      .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        localStorage.setItem("profile", JSON.stringify(action.payload.user));
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      .addCase(logoutUser.fulfilled, (state) => {
+      .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.token = null;
       });
   },
 });
 
+export const { setUser } = authSlice.actions;
 export default authSlice.reducer;

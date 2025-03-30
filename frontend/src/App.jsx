@@ -7,7 +7,8 @@ import PostList from "./components/PostList";
 import PostForm from "./components/PostForm";
 import UserProfile from "./components/UserProfile";
 import AuthPage from "./components/AuthPage";
-import NotFound from "./components/NotFound"; // New 404 Page
+import PostDetails from "./components/PostDetails";
+
 
 export default function App() {
   return (
@@ -31,7 +32,7 @@ export default function App() {
           <Route path="/create-post" element={<PostForm />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/profile" element={<UserProfile />} />
-          <Route path="*" element={<NotFound />} /> {/* Catch-all route for 404 */}
+          <Route path="/posts/:id" element={<PostDetails />} />
         </Routes>
       </main>
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { login, signUp } from "../redux/features/authSlice";
+import { login, signup } from "../redux/features/authSlice";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -12,12 +12,13 @@ export default function AuthPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (isSignup) {
-      dispatch(signUp(formData));
-    } else {
-      dispatch(login({ email: formData.email, password: formData.password }));
-    }
-    navigate("/"); // Redirect to home page after login/signup
+    const action = isSignup ? signup(formData) : login({ email: formData.email, password: formData.password });
+
+    dispatch(action).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        navigate("/"); // Redirect to home after successful login/signup
+      }
+    });
   };
 
   return (
@@ -36,6 +37,7 @@ export default function AuthPage() {
           {isSignup && (
             <input
               type="text"
+              name="name"
               placeholder="Full Name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -45,6 +47,7 @@ export default function AuthPage() {
           )}
           <input
             type="email"
+            name="email"
             placeholder="Email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -53,6 +56,7 @@ export default function AuthPage() {
           />
           <input
             type="password"
+            name="password"
             placeholder="Password"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -65,7 +69,7 @@ export default function AuthPage() {
             type="submit"
             className="w-full bg-teal-500 text-white py-3 rounded-lg font-semibold hover:bg-teal-600 transition"
           >
-            {isSignup ? "Sign Up" : "Login"}
+            {isSignup ? "Signup" : "Login"}
           </motion.button>
         </form>
 
@@ -76,7 +80,7 @@ export default function AuthPage() {
             className="text-teal-400 cursor-pointer font-medium"
             onClick={() => setIsSignup(!isSignup)}
           >
-            {isSignup ? "Login" : "Sign Up"}
+            {isSignup ? "Login" : "Signup"}
           </motion.span>
         </p>
       </motion.div>
