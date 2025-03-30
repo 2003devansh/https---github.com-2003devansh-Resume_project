@@ -5,7 +5,7 @@ const getPost = async (req,res)=>{
         const posts = await Post.find() ;
         res.status(200).json(posts) ;
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: error.message });
     }
 }
 
@@ -16,12 +16,11 @@ const createPost = async (req,res)=>{
             title,
             content,
             image,
-            creator: req.userId, 
         })
         await newPost.save() ;
         res.status(201).json(newPost);
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: error.message });
     }
 }
 
